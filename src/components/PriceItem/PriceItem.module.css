@@ -1,0 +1,65 @@
+@import '../../css/variables.css';
+
+.item {
+    width: calc(var(--item-field-width) * 3);
+    display: flex;
+    justify-content: center;
+}
+
+.askWrapper {
+    position: relative;
+    width: var(--item-field-width);
+    background: linear-gradient(0.25turn, #fff, var(--border-color));
+    height: var(--item-height);
+}
+
+.priceWrapper {
+    position: relative;
+    width: var(--item-field-width);
+    background-color: var(--border-color);
+    height: var(--item-height);
+}
+
+.bidWrapper {
+    position: relative;
+    width: var(--item-field-width);
+    background: linear-gradient(-0.25turn, #fff, var(--border-color));
+    height: var(--item-height);
+}
+
+
+
+.ask {
+    position: absolute;
+    top: 0px;
+    bottom: 1px;
+    left: 1px;
+    right: 0px;
+    color: green;
+    text-align: end;
+    background-color: #fff;
+    padding-right: 12px;
+}
+
+.price {
+    position: absolute;
+    top: 0px;
+    bottom: 1px;
+    left: 0px;
+    right: 0px;
+    color: #000;
+    text-align: center;
+    background-color: #fff;
+}
+
+.bid {
+    position: absolute;
+    top: 0px;
+    bottom: 1px;
+    left: 0px;
+    right: 1px;
+    color: tomato;
+    text-align: start;
+    background-color: #fff;
+    padding-left: 12px;
+}

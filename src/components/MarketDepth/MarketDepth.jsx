@@ -3,26 +3,18 @@ import { getSnapshot } from '../../plugins/eventBus';
 import { GetSnapshotService } from '../../plugins/GetSnapshotService/GetSnapshotService';
 import { prepareInitialSnapshotData } from '../../utils';
 import { PriceItem } from '../PriceItem';
+import { Row, Col, Typography } from 'antd';
+import styles from './MarketDepth.module.css';
 
 const DEPTH = 100;
 const SYMBOL = 'BTCUSDT'
+
+
 
 const getSnapShotService = new GetSnapshotService(SYMBOL, DEPTH, getSnapshot.emit)
 
 
 const MarketDepthComponent = () => {
-
-    // что должен далеть компонент?
-    // положить initial стакан в стейт
-        // - нужно запросить у шины первоначальный снепшот
-        // добавить в шину сервис получения данных от бинанс
-            // подписываемся на событие "получение снапшота" - вернуть отписку! 
-            // передать туда сет стейт
-        // подписаться на его обновления - значит передать колбек
-            // полписаться нс обновление стакана - передать колбек/утилку с проверкуами (свежее ли обновление) и сет стейт (хитор сетить чтобы лишнего не рендерить или примитивы)
-            // не забыть отписку
-        // пусть в обновлении будет type который показвает это снапшот или обновление стакана
-        //  
 
     const [markedDepthData, setMarkedDepthData] = useState(undefined);
     const [initialApdateId, setInitialUpdateId] = useState(0);
@@ -63,8 +55,20 @@ const MarketDepthComponent = () => {
 
     return (
         <>
-            <h2>Market Depth will be here</h2>
-            {markedDepthData && priceItems}
+            <Typography.Title className={styles.title}>Market Depth</Typography.Title>
+            { markedDepthData && 
+            (<>
+                <div className={styles.header}>
+                    <div className={styles.headerItem}>asks</div>
+                    <div className={styles.headerItem}>price</div>
+                    <div className={styles.headerItem}>bid</div>
+                </div>
+                <ul className={styles.ul}>
+                    {priceItems}
+                </ul>
+            </>
+            )
+            }
         </>
     )
 }

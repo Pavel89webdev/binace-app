@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { MarketDepth } from "./components/MarketDepth";
 import { DragAndDrop } from "./components/DragAndDrop";
+import styles from './App.module.css'
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -48,7 +49,7 @@ function App() {
 						/>
 					</Header>
 
-					<Content>
+					<Content className={styles.content}>
 						<Routes>
 							<Route
 								path={FIRST_PAGE_URL}

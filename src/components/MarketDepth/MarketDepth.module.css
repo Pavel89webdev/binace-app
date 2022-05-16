@@ -1,0 +1,44 @@
+@import '../../css/variables.css';
+
+.title {
+    text-align: center;
+}
+
+.ul {
+    padding: 0;
+    list-style: none;
+    height: 80vh;
+    overflow-y: scroll;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--background-color);
+}
+
+.header {
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ul::-webkit-scrollbar {
+    position: absolute;
+    right: 50%;
+    width: 10px;
+    background: transparent;
+}
+
+.ul::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+.ul:hover::-webkit-scrollbar-thumb  {
+    background: var(--border-color);
+}
+
+.headerItem {
+    text-align: center;
+    width: calc(var(--item-field-width) * 0.8);
+}

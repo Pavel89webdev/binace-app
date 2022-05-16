@@ -1,7 +1,5 @@
 const SNAPSHOT_URL_BASE = "https://api.binance.com/api/v3/depth";
 
-//'https://api.binance.com/api/v3/depth?symbol=BNBBTC&limit=1000'
-
 export class GetSnapshotService {
 	constructor(symbol, limit, emitter) {
 		this.symbol = symbol;
