@@ -1,5 +1,7 @@
 # Binance App (in progress)
 
+### Try it here: https://binace-app.vercel.app/
+
 ## What need to do:
 
 SPA with some core, with possibility to add some plugins in the core, plugins and React components with this plugins should upload asynchronous.
@@ -20,10 +22,10 @@ What is already done:
 -   [x] event bus with asynchronous uploading using webpack chunk and dynamic import;
 -   [x] getSnapshot using webpack chunk and dynamic import;
 -   [x] updateMarketDepth using webpack chunk and dynamic import;
+-   [x] deploy on vercel;
 
 What need to do, or solve:
 
 -   [ ] kill websocket instance when it not need yet.
 -   [ ] make empty first page and describe on it about app.
 -   [ ] add some virtual list to perform to render big list of market depth.
--   [ ] deploy on Vercel
