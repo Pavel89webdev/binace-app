@@ -1,68 +1,96 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { prepareInitialSnapshotData } from '../../utils';
+import { useEffect, useState, useMemo } from "react";
+import { prepareInitialSnapshotData, updateMarketDepth } from '../../utils';
 import { PriceItem } from '../PriceItem';
 import { Typography } from 'antd';
 import styles from './MarketDepth.module.css';
-import { SYMBOLS, DEFAULT_DEPTH } from '../../consts';
+import { SYMBOLS, DEFAULT_DEPTH, PARAMS_SYMBOLS } from '../../consts';
 import { addPlugin, plugins } from '../../core';
 
-// const getSnapShotService = new GetSnapshotService(SYMBOLS.BTCUSDT, DEFAULT_DEPTH, getSnapshot.emit)
+
+const updateMarketData = (setMarkedDepthData) => (event) => {
+    const data = event.data;
+    if (data) {
+        const updateIdLast = data?.u;
+
+        const asks = data?.a;
+        const bids = data?.b;
+
+        if( asks && bids && data ) setMarkedDepthData(({data, initialUpdateId}) => ({data: updateMarketDepth({initialUpdateId,data, asks, bids, updateIdLast}), initialUpdateId}));
+    }
+};
 
 const MarketDepthComponent = () => {
 
     const [markedDepthData, setMarkedDepthData] = useState(undefined);
-    const [initialApdateId, setInitialUpdateId] = useState(0);
 
-    const dataSetter = useCallback((data) => {
+    const snapshotDataSetter = (data) => {
         const { lastUpdateId, asks, bids } = data;
 
-        setInitialUpdateId(lastUpdateId);
-
         const preparedData = prepareInitialSnapshotData(asks, bids);
-        setMarkedDepthData(preparedData)
-    },[]);
+        setMarkedDepthData({initialUpdateId: lastUpdateId, data: preparedData})
+    };
 
     useEffect( () => {
 
         async function connectEventBus () {
-            // получить асинхронно плагин
+            // получить снимок биржевого стакана
+            // получить асинхронно плагин шины данных
             const eventBus = await import('../../plugins/eventBus');
 
             // добавить в ядро
             addPlugin('eventBus', eventBus);
 
-            // асинхронно получаем сервис
+            // асинхронно получаем snapshot сервис 
             const {GetSnapshotService} = await import('../../plugins/GetSnapshotService/GetSnapshotService');
 
             // подписать сервис чтобы транслривать события
             const getSnapShotService = new GetSnapshotService(SYMBOLS.BTCUSDT, DEFAULT_DEPTH, plugins.eventBus.getSnapshot.emit)
 
             // подписать колбек на нужное событие
-            plugins.eventBus.getSnapshot.subscribe(dataSetter);
+            plugins.eventBus.getSnapshot.subscribe(snapshotDataSetter);
 
             // запускаем сервис
             getSnapShotService.getSnapshot();
+
+            // подписаться на обновления биржевого стакана по WSS
+            // асинхронно получаем сервис чтобы транслировать собыития
+            const { UpdateMarketService } = await import('../../plugins/UpdateMarketService/UpdateMarketService');
+
+            // создаем экземпляр сервиса
+            const updateMarketService = new UpdateMarketService(SYMBOLS.BTCUSDT, [PARAMS_SYMBOLS.BTCUSDT], plugins.eventBus.updateMarket.emit)
+
+            // подписываемся на изменения, передаем колбек
+            plugins.eventBus.updateMarket.subscribe(updateMarketData(setMarkedDepthData))
+
+            // запускаем сервис
+            updateMarketService.startWS();
+
         }
 
         connectEventBus();
+    },[]);
 
-        // как сделать отписку если тут все асинхронно?
-    },[dataSetter]);
+
+    useEffect(() => {
+        // как отписка от getSnapshot
+        const unsubscribe = plugins?.eventBus?.getSnapshot?.subscribe(snapshotDataSetter); 
+
+        if(unsubscribe) return unsubscribe;
+    },[])
 
     const priceItems = useMemo(() => {
-        const result = [];
+        const data = markedDepthData?.data;
 
-        for(let price in markedDepthData) {
-            if(markedDepthData.hasOwnProperty(price)){
+        if(data){
+            const sortedPriceKeys = Object.keys(data).sort((a,b) => Number(b) - Number(a));
 
-                const { ask, bid } = markedDepthData[price]; 
-
-                result.push(<PriceItem key={price} price={price} ask={ask} bid={bid}/>);
-            }
+            return sortedPriceKeys.map((price) => {
+            
+                const { ask, bid } = data[price];
+    
+                return (<PriceItem key={price} price={price} ask={ask} bid={bid}/>)
+            });
         }
-
-        return result;
-
     }, [markedDepthData]);
 
 

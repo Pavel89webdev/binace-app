@@ -16,7 +16,7 @@ export class GetSnapshotService {
 			fetch(this.url)
 				.then((data) => data.json())
 				.then((data) => {
-					const preparedData = data;
+					const preparedData = data; // надо готовить data???
 					this.emitter(preparedData);
 					this.loading = false;
 				});
