@@ -1,18 +1,12 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { getSnapshot } from '../../plugins/eventBus';
-import { GetSnapshotService } from '../../plugins/GetSnapshotService/GetSnapshotService';
 import { prepareInitialSnapshotData } from '../../utils';
 import { PriceItem } from '../PriceItem';
-import { Row, Col, Typography } from 'antd';
+import { Typography } from 'antd';
 import styles from './MarketDepth.module.css';
+import { SYMBOLS, DEFAULT_DEPTH } from '../../consts';
+import { addPlugin, plugins } from '../../core';
 
-const DEPTH = 100;
-const SYMBOL = 'BTCUSDT'
-
-
-
-const getSnapShotService = new GetSnapshotService(SYMBOL, DEPTH, getSnapshot.emit)
-
+// const getSnapShotService = new GetSnapshotService(SYMBOLS.BTCUSDT, DEFAULT_DEPTH, getSnapshot.emit)
 
 const MarketDepthComponent = () => {
 
@@ -28,12 +22,31 @@ const MarketDepthComponent = () => {
         setMarkedDepthData(preparedData)
     },[]);
 
-    useEffect(() => {
-        const unsubscribe = getSnapshot.subscribe(dataSetter);
+    useEffect( () => {
 
-        getSnapShotService.getSnapshot();
+        async function connectEventBus () {
+            // получить асинхронно плагин
+            const eventBus = await import('../../plugins/eventBus');
 
-        return unsubscribe;
+            // добавить в ядро
+            addPlugin('eventBus', eventBus);
+
+            // асинхронно получаем сервис
+            const {GetSnapshotService} = await import('../../plugins/GetSnapshotService/GetSnapshotService');
+
+            // подписать сервис чтобы транслривать события
+            const getSnapShotService = new GetSnapshotService(SYMBOLS.BTCUSDT, DEFAULT_DEPTH, plugins.eventBus.getSnapshot.emit)
+
+            // подписать колбек на нужное событие
+            plugins.eventBus.getSnapshot.subscribe(dataSetter);
+
+            // запускаем сервис
+            getSnapShotService.getSnapshot();
+        }
+
+        connectEventBus();
+
+        // как сделать отписку если тут все асинхронно?
     },[dataSetter]);
 
     const priceItems = useMemo(() => {
@@ -44,7 +57,7 @@ const MarketDepthComponent = () => {
 
                 const { ask, bid } = markedDepthData[price]; 
 
-                result.push(<PriceItem price={price} ask={ask} bid={bid}/>);
+                result.push(<PriceItem key={price} price={price} ask={ask} bid={bid}/>);
             }
         }
 
@@ -57,7 +70,8 @@ const MarketDepthComponent = () => {
         <>
             <Typography.Title className={styles.title}>Market Depth</Typography.Title>
             { markedDepthData && 
-            (<>
+            (<div className={styles.centered}>
+                <div className={styles.wrapper}>
                 <div className={styles.header}>
                     <div className={styles.headerItem}>asks</div>
                     <div className={styles.headerItem}>price</div>
@@ -66,7 +80,9 @@ const MarketDepthComponent = () => {
                 <ul className={styles.ul}>
                     {priceItems}
                 </ul>
-            </>
+            </div>
+            </div>
+            
             )
             }
         </>
